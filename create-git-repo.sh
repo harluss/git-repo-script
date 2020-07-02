@@ -1,7 +1,6 @@
 #!/bin/bash
 
 creategitrepo(){
-    local PATH_PROJECTS_FOLDER=~/desktop/code/projects
     local GITHUB_USERNAME=$GITHUB_USER
     local GITHUB_TOKEN=$GITHUB_API_TOKEN
     
@@ -13,7 +12,6 @@ creategitrepo(){
     local description=""
     local is_private=false
     local error_options=false
-    local editor_open=false
 
     while getopts ":d:hop" FLAG; do
         case $FLAG in
@@ -23,9 +21,6 @@ creategitrepo(){
             h)
                 _help_creategitrepo
                 return 0
-                ;;
-            o)
-                editor_open=true
                 ;;
             p)
                 is_private=true
@@ -54,11 +49,6 @@ creategitrepo(){
         return 1
     fi
 
-    if [[ -d "$PATH_PROJECTS_FOLDER/$name" ]]; then
-        _echo_error "Folder $PATH_PROJECTS_FOLDER/$name/ already exist."
-        return 1
-    fi
-
     git ls-remote https://github.com/$GITHUB_USERNAME/$name 2>/dev/null
 
     if (( $? == 0 )); then
@@ -77,23 +67,10 @@ creategitrepo(){
     if (( $response != 201 )); then
         _echo_error "Remote repository creation failed (Status Code: $response)."
         return 1
-    else
-        _echo_ok "Remote repository $name created (Status Code: $response)."
     fi
-        
-    mkdir -p $PATH_PROJECTS_FOLDER/$name && _echo_ok "Folder $name/ created."
-    cd $PATH_PROJECTS_FOLDER/$name 
-    touch README.md && echo "# $name" >> README.md && _echo_ok "README.md file created."
-
-    git init && _echo_ok "Local repository initiated."
-    git add .
-    git commit -m "initial commit" && _echo_ok "Initial commit done."
-    git remote add origin https://github.com/$GITHUB_USERNAME/$name.git && _echo_ok "Remote repository added."
-    git push -u origin master && _echo_ok "Initial commit pushed to the remote repository."
-
-    if [[ $editor_open == true ]]; then
-        code .
-    fi
+    
+    _echo_ok "Remote repository $name created (Status Code: $response)."
+    _echo_ok_next
 
     return 0
 }
@@ -106,20 +83,23 @@ _echo_ok(){
     echo -e "${COLOR_OK}OK:\t$1${COLOR_DEFAULT}" >&2
 }
 
+_echo_ok_next(){
+    echo -e "${COLOR_OK}NEXT:\tNavigate to project's folder and run:
+
+    \tgit init
+    \tgit remote add origin https://github.com/$GITHUB_USERNAME/$name.git
+    ${COLOR_DEFAULT}"
+}
+
 _help_creategitrepo(){
-echo "
-Usage:  create-git-repo [-d \"Some description.\"] [-o] [-p] [-h] <repository-name>
+    echo "
+Usage:  create-git-repo [-d \"Some description\"] [-p] [-h] <repository-name>
 
-Where:
-        -d \"text\"   Adds description (None by default)
-        -h          Help
-        -o          Opens project in VS Code
+Where:  -d \"text\"   Adds description (None by default)
         -p          Sets visibility to Private (Public by default)
+        -h          Displays help
 
-Info:   Shell script automating GitHub repository creation process.
-        Creates remote Git repository and local folder with an empty README.md file, 
-        initiates local Git repository, makes initial commit, adds remote repository 
-        and pushes to it."
+Info:   Shell script automating GitHub remote repository creation."
 }
 
 creategitrepo "$@"
