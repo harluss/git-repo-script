@@ -3,7 +3,7 @@
 creategitrepo(){
     local GITHUB_USERNAME=$GITHUB_USER
     local GITHUB_TOKEN=$GITHUB_API_TOKEN
-    
+
     local COLOR_ERROR="\e[31m"
     local COLOR_OK="\e[32m"
     local COLOR_DEFAULT="\e[39m"
@@ -76,19 +76,22 @@ creategitrepo(){
 }
 
 _echo_error(){
-    echo -e "${COLOR_ERROR}ERROR:\t$1${COLOR_DEFAULT}" >&2
+    echo -e "${COLOR_ERROR}ERROR:${COLOR_DEFAULT}\t$1"
 }
 
 _echo_ok(){
-    echo -e "${COLOR_OK}OK:\t$1${COLOR_DEFAULT}" >&2
+    echo -e "${COLOR_OK}OK:${COLOR_DEFAULT}\t$1"
 }
 
 _echo_ok_next(){
-    echo -e "${COLOR_OK}NEXT:\tNavigate to project's folder and run:
+    echo -e "${COLOR_OK}NEXT:${COLOR_DEFAULT}\tNavigate to project's folder and add origin with:
 
     \tgit init
     \tgit remote add origin https://github.com/$GITHUB_USERNAME/$name.git
-    ${COLOR_DEFAULT}"
+
+    \tOr clone the repo with:
+
+    \tgit clone https://github.com/$GITHUB_USERNAME/$name.git"
 }
 
 _help_creategitrepo(){
